@@ -209,8 +209,9 @@ class FeatureWindowManager(BaseFeatureManager):
                 if current_sensor_state and current_sensor_state.state not in (STATE_UNAVAILABLE, STATE_UNKNOWN):
                     self._window_state = current_sensor_state.state
                 else:
-                    # Fallback to old_state if current state is unavailable
-                    self._window_state = old_state.state if old_state else STATE_OFF
+                    # Fallback to old_state if current state is unavailable.
+                    # Note: old_state is guaranteed non-None here due to the guard at line 235.
+                    self._window_state = old_state.state or STATE_OFF
                 return
 
             _LOGGER.debug("%s - Window delay condition is satisfied", self)
