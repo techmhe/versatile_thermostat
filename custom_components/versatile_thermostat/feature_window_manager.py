@@ -203,7 +203,14 @@ class FeatureWindowManager(BaseFeatureManager):
                 _LOGGER.debug(
                     "Window delay condition is not satisfied. Ignore window event"
                 )
-                self._window_state = old_state.state or STATE_OFF
+                # The sensor state changed during the delay period.
+                # Get the current sensor state instead of using the stale old_state from the closure.
+                current_sensor_state = self._hass.states.get(self._window_sensor_entity_id)
+                if current_sensor_state and current_sensor_state.state not in (STATE_UNAVAILABLE, STATE_UNKNOWN):
+                    self._window_state = current_sensor_state.state
+                else:
+                    # Fallback to old_state if current state is unavailable
+                    self._window_state = old_state.state if old_state else STATE_OFF
                 return
 
             _LOGGER.debug("%s - Window delay condition is satisfied", self)
